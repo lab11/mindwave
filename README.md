@@ -75,4 +75,4 @@ user input.
 
 Make the serial port a command-line parameter.
 
-Have Hue turn off which program is disconnected.
+Have Hue turn off before program disconnects.

@@ -17,6 +17,7 @@ def main():
     all_lights = bridge.get_light_objects()
     light = [l for l in all_lights if l.name == light_name][0]
     light.transitiontime = 10
+    light.on = True
 
     # in light.xy, x from 0 to 1 (y = 0) goes from blue to red.
 
@@ -37,6 +38,7 @@ def main():
                 mindwave.report_to_gatd()
 
     except KeyboardInterrupt:
+        light.on = False
         mindwave.clean_exit()
 
 def new_xy(meditation, attention):

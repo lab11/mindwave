@@ -75,4 +75,4 @@ user input.
 
 Make the serial port a command-line parameter.
 
-Have Hue turn off before program disconnects.
+Have Hue return to original state when mental_hue.py ends. Now it just turns off (with a warning).

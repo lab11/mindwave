@@ -27,9 +27,9 @@ should then be able to see the headset.
 
 There are two programs:
 
-1. mindwave_reader.py, which prints out the readings from the headset into the terminal
+1. **mindwave_reader.py**, which prints out the readings from the headset into the terminal
 and can optionally send them to GATD.
-2. mental_hue.py, which does everything mindwave_reader can do plus also changes a Philips
+2. **mental_hue.py**, which does everything mindwave_reader can do plus also changes a Philips
 Hue bulb to reflect your meditation (blue) and attention (red) balance in real-time.
 
 These operating instructions apply to both mindwave_reader.py and mental_hue.py.
@@ -57,6 +57,7 @@ Thus, you can specify each of these parameters on the command-line.
 
 ## Example Usages:
 
+```
 python mindwave_reader.py
 python mindwave_reader.py gatd=False
 python mindwave_reader.py showspectrum=True
@@ -64,9 +65,10 @@ python mindwave_reader.py gatd=True uniqname=mclarkk showspectrum=False *
 python mindwave_reader.py gatd=True uniqname=mclarkk showspectrum=True  *
 python mindwave_reader.py gatd=False showspectrum=True                  *
 python mindwave_reader.py gatd=False showspectrum=False                 *
+```
 
 If you leave out any necessary parameters the program will just ask you to 
-provide them manually. The examples that are starred will require no manual 
+provide them manually. The examples that are starred require no manual 
 user input.
 
 TODO: Make the serial port a command-line parameter.

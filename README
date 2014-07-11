@@ -1,0 +1,40 @@
+mindwave_reader.py is the main class here. Other apps like mental_hue.py build off of it.
+
+Dependencies: 
+
+You will need to install the library python-mindwave.
+
+1. Clone the Git repo: https://github.com/akloster/python-mindwave
+2. python setup.py install
+
+
+
+The program will use text-based menus to get your user preferences, but this can be obnoxious.
+The preferences are:
+
+send data to gatd: true/false
+	if true: your uniqname of full name to send to gatd with your report
+show the frequency breakdown of the EEG signal
+
+Example usages:
+
+python mindwave_reader.py
+python mindwave_reader.py gatd=False
+python mindwave_reader.py showspectrum=True
+python mindwave_reader.py gatd=True uniqname=mclarkk showspectrum=False <-- avoids user input
+python mindwave_reader.py gatd=True uniqname=mclarkk showspectrum=True  <-- avoids user input
+python mindwave_reader.py gatd=False showspectrum=True                  <-- avoids user input
+python mindwave_reader.py gatd=False showspectrum=False                 <-- avoids user input
+
+
+And of course, you can leave out any of those parameters and it'll be fine, the program will just ask you to provide them later if it needs them.
+
+
+
+To Run:
+
+1. Pair the MindWave headset with your computer over Bluetooth.
+2. Figure out what serial port the headset is communicating over, and change the line in mental_hue.py to match your port.
+3. python mental_hue.py
+
+Fun fact: Both the Hue and the GATD connections are optional. You can just just get the terminal printout of the headset readings, if you want. You can also use the Hue without reporting to GATD, or just report to GATD without using the Hue.

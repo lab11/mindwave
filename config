@@ -1,0 +1,7 @@
+{
+    "mindwave_serial_port": "/dev/tty.MindWaveMobile-DevA-17",
+    "hue_bridge_addr": "4908hue.eecs.umich.edu",
+    "user": "mclarkk",
+    "send_to_gatd": "False",
+    "show_spectrum": "False"
+}

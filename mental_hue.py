@@ -5,24 +5,23 @@ import mindwave_reader as mw
 import hue_manager
 import time
 
-serial_port = '/dev/tty.MindWaveMobile-DevA-10'
+#serial_port = '/dev/tty.MindWaveMobile-DevA-9'
 
 MAX_BRIGHT= 200
 
 def main():
     print("Starting mental_hue")
-    [hub_addr, light_name] = hue_manager.get_configuration()
+    [hub_addr, light_choices] = hue_manager.get_configuration()
 
     bridge = hue_manager.hue_connect(hub_addr)
     all_lights = bridge.get_light_objects()
-    light = [l for l in all_lights if l.name == light_name][0]
-    light.transitiontime = 10
-    light.on = True
-
-    # in light.xy, x from 0 to 1 (y = 0) goes from blue to red.
+    my_lights = [l for l in all_lights if l.name in light_choices]
+    for light in my_lights:
+        light.transitiontime = 10
+        light.on = True
 
     # Mindwave stuff
-    mindwave = mw.MindWaveReader(serial_port)
+    mindwave = mw.MindWaveReader()
     try:
         while True:
             # wait 1 sec to collect data
@@ -31,8 +30,11 @@ def main():
             mindwave.update_readings()
             mindwave.print_readings()
 
-            light.xy = new_xy(mindwave.meditation, mindwave.attention)
-            light.brightness = new_brightness(mindwave.meditation, mindwave.attention)
+            # Hue stuff
+            # in light.xy, x from 0 to 1 (y = 0) goes from blue to red.
+            for light in my_lights:
+                light.xy = new_xy(mindwave.meditation, mindwave.attention)
+                light.brightness = new_brightness(mindwave.meditation, mindwave.attention)
     
             if mindwave.connect_to_GATD:
                 mindwave.report_to_gatd()

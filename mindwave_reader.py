@@ -7,10 +7,12 @@ from pymindwave import headset
 import httplib, urllib, urllib2
 import json
 
-serial_port = '/dev/tty.MindWaveMobile-DevA-10'
+#serial_port = '/dev/tty.MindWaveMobile-DevA-10'
+
+usage = "\nUsage:\n\n   python <program.py> <config>"
 
 def main():
-    mindwave = MindWaveReader(serial_port)
+    mindwave = MindWaveReader()
     try:
         while True:
             # wait 1 sec to collect data
@@ -19,19 +21,20 @@ def main():
             mindwave.update_readings()
             mindwave.print_readings()
     
-            if mindwave.connect_to_GATD:
+            if mindwave.send_to_gatd:
                 mindwave.report_to_gatd()
 
     except KeyboardInterrupt:
         mindwave.clean_exit()
 
+
 class MindWaveReader():
     gatd_profile_id = "PkaJoO4gav"
 
-    connect_to_GATD = None
-    show_frequency_breakdown = None
-
-    username = None
+    serial_port = None
+    send_to_gatd = None
+    show_spectrum = None
+    user = None
 
     attention = None
     meditation = None
@@ -44,11 +47,11 @@ class MindWaveReader():
     low_gamma = None
     high_gamma = None
 
-    hs = None
+    hs = None #headset
 
-    def __init__(self, serial_port):
+    def __init__(self):
+        self.get_config()
         self.print_greeting()
-        self.get_user_prefs()
 
         headset_connected = False
         try:
@@ -58,9 +61,10 @@ class MindWaveReader():
                     headset_connected = True
                 except:
                     print("\n** Problem connecting to headset.")
-                    print("    Is {} the right serial port?".format(serial_port))
+                    print("    Is {} the right serial port?".format(self.serial_port))
                     print("    Are you sure the headset is on and paired with your computer?\n")
                     raw_input("Hit <enter> to try again (^C to exit).")
+                    self.get_config()
         except KeyboardInterrupt:
             print("")
             sys.exit(0)
@@ -73,31 +77,47 @@ class MindWaveReader():
     def print_greeting(self):
         print("\nStarting MindWave Mobile headset reader.\n")
 
+    def get_config(self):
+        config = None
+        if len(sys.argv) == 2:
+            config_file = sys.argv[1]
+            json_data=open(config_file).read()
+            config = json.loads(json_data)
+        else:
+            print(usage)
+            sys.exit()
+
+        self.serial_port = config["mindwave_serial_port"]
+        self.user = config["user"]
+        self.send_to_gatd = config["send_to_gatd"]
+        self.show_spectrum = config["show_spectrum"]
+
+
     def get_user_prefs(self):
         username = None
         if len(sys.argv) > 1:
             for arg in sys.argv:
                 if arg == "gatd=False":
-                    self.connect_to_GATD = False
+                    self.send_to_gatd = False
                 elif arg == "gatd=True":
-                    self.connect_to_GATD = True
+                    self.send_to_gatd = True
                 elif arg == "showspectrum=False":
-                    self.show_frequency_breakdown = False
+                    self.show_spectrum = False
                 elif arg == "showspectrum=True":
-                    self.show_frequency_breakdown = True
+                    self.show_spectrum = True
                 elif arg[0:9] == "uniqname=":
                     username = arg.split("=")[1].lower()
-        if self.connect_to_GATD == None:
+        if self.send_to_gatd == None:
             gatd_flag = self.get_valid_input("Send readings to GATD? [y/n]: ", ["y","n"])
-            self.connect_to_GATD = True if gatd_flag == "y" else False
+            self.send_to_gatd = True if gatd_flag == "y" else False
         self.username = username if username != None else None
-        if self.username == None and self.connect_to_GATD == True:
+        if self.username == None and self.send_to_gatd == True:
             name = raw_input("\nPlease provide your uniqname (or full name if you don't have a uniqname) for inclusion in reports to GATD: ")
             self.username = name.lower()
-        if self.show_frequency_breakdown == None:
+        if self.show_spectrum == None:
             print("\nAttention and meditation levels will be shown.")
             view_flag = self.get_valid_input("Do you want to see the frequency breakdown as well? (Full screen recommended.) [y/n]: ", ["y","n"])
-            self.show_frequency_breakdown = True if view_flag == "y" else False
+            self.show_spectrum = True if view_flag == "y" else False
 
             
     def report_to_gatd(self):
@@ -131,7 +151,7 @@ class MindWaveReader():
 
     def print_readings(self):
         format_str = ""
-        if (self.show_frequency_breakdown):
+        if (self.show_spectrum):
             labels = ["attention", "meditation", "delta", "theta", "low alpha", "high alpha", "low beta", "high beta", "low gamma", "high gamma"]
             readings = [self.attention, self.meditation, self.delta, self.theta, self.low_alpha, self.high_alpha, self.low_beta, self.high_beta, self.low_gamma, self.high_gamma]
             cols = [labels[i] + ": " + str(readings[i]) for i in range(len(labels))]

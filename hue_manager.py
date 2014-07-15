@@ -1,6 +1,7 @@
 import sys, sched, time, threading
 from threading import Timer
 from phue import Bridge
+import json
 
 #Globals
 window = 2 #num in avg
@@ -13,10 +14,13 @@ bridge = None
 lights = None
 light = None
 
+usage = "\nUsage:\n\n   python <program.py> <config>"
+
 def get_configuration():
   global bridge, lights, light
+  config = get_json_config()
   # Connect to hue
-  hub_addr = get_hub_addr()
+  hub_addr = get_hub_addr() if "hue_bridge_addr" not in config else config["hue_bridge_addr"]
   bridge = hue_connect(hub_addr)
   all_lights = bridge.get_light_objects()
   lights = [] 
@@ -24,9 +28,20 @@ def get_configuration():
   for (i, l) in enumerate(all_lights):
     if (bridge.get_light(l.name))['state']['reachable'] == True:
       lights.append(l)
-  light = get_bulb_choice()
+  light_choices = get_bulb_choices()
 
-  return [hub_addr, light.name] 
+  return [hub_addr, light_choices] 
+
+def get_json_config():
+    data = None
+    if len(sys.argv) == 2:
+        config_file = sys.argv[1]
+        json_data = open(config_file).read()
+        data = json.loads(json_data)
+    else:
+        print(usage)
+        sys.exit()
+    return data
 
 def hue_connect(addr):
   bridge = None
@@ -56,21 +71,26 @@ def get_hub_addr():
   return address
 
 
-def get_bulb_choice():
+def get_bulb_choices():
   print("\nReachable bulbs:\n")
   print("\n".join(["   [{}] {}".format(i+1, str(light.name)) for (i, light) in enumerate(lights)]))
   input_verified = False
   selection = ""
   while(not input_verified):
-    selection = raw_input("\n   Select a bulb number: ")
-    try:
-      selection = int(selection)-1
-      if selection < 0 or selection >= len(lights):
-        raise Exception
-      input_verified = True
-    except:
-      print("   '{}' is not a valid selection. Try again.".format(selection))
-  return lights[selection]
+    selections = (raw_input("\n   Select bulb number(s). (Comma separate multiple numbers): ")).replace(" ","").split(",")
+    selected_lights = []
+    for selection in selections:
+      try:
+        selection_index = int(selection)-1
+        if selection_index < 0 or selection_index >= len(lights):
+          raise Exception
+        input_verified = True
+        selected_lights.append(lights[selection_index].name)
+      except:
+        print("   '{}' is not a valid selection. Try again.".format(selection))
+        input_verified = False
+        break
+  return selected_lights
 
 
 def set_brightness(brightness):

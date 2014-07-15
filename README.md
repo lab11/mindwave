@@ -10,7 +10,11 @@ Dependencies
 You will need to install the library python-mindwave.
 
 1. Clone the Git repo: https://github.com/akloster/python-mindwave
-2. python setup.py install
+2. `python setup.py install`
+
+You may also need to install pyserial.
+
+1. `sudo pip install pyserial`
 
 
 To Run

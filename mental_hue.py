@@ -5,7 +5,7 @@ import mindwave_reader as mw
 import hue_manager
 import time
 
-serial_port = '/dev/tty.MindWaveMobile-DevA-10'
+serial_port = '/dev/tty.MindWaveMobile-DevA'
 
 MAX_BRIGHT= 200
 

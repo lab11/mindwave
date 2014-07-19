@@ -7,7 +7,7 @@ import time
 
 #serial_port = '/dev/tty.MindWaveMobile-DevA-9'
 
-MAX_BRIGHT= 200
+MAX_BRIGHT= 255
 
 def main():
     print("Starting mental_hue")
@@ -17,8 +17,8 @@ def main():
     all_lights = bridge.get_light_objects()
     my_lights = [l for l in all_lights if l.name in light_choices]
     for light in my_lights:
-        light.transitiontime = 10
         light.on = True
+        light.transitiontime = 7
 
     # Mindwave stuff
     mindwave = mw.MindWaveReader()
@@ -36,11 +36,12 @@ def main():
                 light.xy = new_xy(mindwave.meditation, mindwave.attention)
                 light.brightness = new_brightness(mindwave.meditation, mindwave.attention)
     
-            if mindwave.connect_to_GATD:
+            if mindwave.send_to_gatd:
                 mindwave.report_to_gatd()
 
     except KeyboardInterrupt:
-        light.on = False
+        for light in my_lights:
+            light.on = False
         mindwave.clean_exit()
 
 def new_xy(meditation, attention):

@@ -89,31 +89,27 @@ class MindWaveReader():
 
         self.serial_port = config["mindwave_serial_port"]
         self.user = config["user"]
-        self.send_to_gatd = config["send_to_gatd"]
-        self.show_spectrum = config["show_spectrum"]
+        self.send_to_gatd = self.str_to_bool(config["send_to_gatd"])
+        self.show_spectrum = self.str_to_bool(config["show_spectrum"])
+
+
+    def str_to_bool(self, s):
+        if s.lower() == "true":
+            return True
+        elif s.lower() == "false":
+            return False
+        else:
+            print("Problem with config file: {} is not a boolean.".format(s))
+            return None
 
 
     def get_user_prefs(self):
-        username = None
-        if len(sys.argv) > 1:
-            for arg in sys.argv:
-                if arg == "gatd=False":
-                    self.send_to_gatd = False
-                elif arg == "gatd=True":
-                    self.send_to_gatd = True
-                elif arg == "showspectrum=False":
-                    self.show_spectrum = False
-                elif arg == "showspectrum=True":
-                    self.show_spectrum = True
-                elif arg[0:9] == "uniqname=":
-                    username = arg.split("=")[1].lower()
         if self.send_to_gatd == None:
             gatd_flag = self.get_valid_input("Send readings to GATD? [y/n]: ", ["y","n"])
             self.send_to_gatd = True if gatd_flag == "y" else False
-        self.username = username if username != None else None
-        if self.username == None and self.send_to_gatd == True:
+        if self.user == None and self.send_to_gatd == True:
             name = raw_input("\nPlease provide your uniqname (or full name if you don't have a uniqname) for inclusion in reports to GATD: ")
-            self.username = name.lower()
+            self.user = name.lower()
         if self.show_spectrum == None:
             print("\nAttention and meditation levels will be shown.")
             view_flag = self.get_valid_input("Do you want to see the frequency breakdown as well? (Full screen recommended.) [y/n]: ", ["y","n"])
@@ -129,7 +125,7 @@ class MindWaveReader():
             data = {}
             for i,label in enumerate(labels):
                 data[label] = readings[i]
-            data["user"] = self.username
+            data["user"] = self.user
             data = json.dumps(data)
             # make POST to GATD
             url = "http://inductor.eecs.umich.edu:8081/" + str(self.gatd_profile_id)
@@ -168,7 +164,7 @@ class MindWaveReader():
 
     def get_headset(self):
         print("\nAttempting to connect to headset...")
-        self.hs = headset.Headset(serial_port)
+        self.hs = headset.Headset(self.serial_port)
 
         # wait some time for parser to udpate state so we might be able
         # to reuse last opened connection.

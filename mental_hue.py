@@ -5,7 +5,8 @@ import mindwave_reader as mw
 import hue_manager
 import time
 
-MAX_BRIGHT= 200
+
+MAX_BRIGHT= 255
 
 def main():
     print("Starting mental_hue")
@@ -15,8 +16,8 @@ def main():
     all_lights = bridge.get_light_objects()
     my_lights = [l for l in all_lights if l.name in light_choices]
     for light in my_lights:
-        light.transitiontime = 10
         light.on = True
+        light.transitiontime = 7
 
     # Mindwave stuff
     mindwave = mw.MindWaveReader()
@@ -31,14 +32,18 @@ def main():
             # Hue stuff
             # in light.xy, x from 0 to 1 (y = 0) goes from blue to red.
             for light in my_lights:
-                light.xy = new_xy(mindwave.meditation, mindwave.attention)
-                light.brightness = new_brightness(mindwave.meditation, mindwave.attention)
+                try:
+                    light.xy = new_xy(mindwave.meditation, mindwave.attention)
+                    light.brightness = new_brightness(mindwave.meditation, mindwave.attention)
+                except:
+                    print("Light command failed for {}".format(light.name))
     
-            if mindwave.connect_to_GATD:
+            if mindwave.send_to_gatd:
                 mindwave.report_to_gatd()
 
     except KeyboardInterrupt:
-        light.on = False
+        for light in my_lights:
+            light.on = False
         mindwave.clean_exit()
 
 def new_xy(meditation, attention):

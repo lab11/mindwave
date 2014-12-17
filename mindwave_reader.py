@@ -128,7 +128,7 @@ class MindWaveReader():
             data["user"] = self.user
             data = json.dumps(data)
             # make POST to GATD
-            url = "http://inductor.eecs.umich.edu:8081/" + str(self.gatd_profile_id)
+            url = "http://gatd.eecs.umich.edu:8081/" + str(self.gatd_profile_id)
             req = urllib2.Request(url, data, {'Content-Type': 'application/json'})
             f = urllib2.urlopen(req)
             response = f.read()
